@@ -1,8 +1,8 @@
 #!/usr/bin/python3
-#2022 Daniel Tate
-#Extremely basic check for portsentry service running, and how many entries are in the portsentry log file.
+# Super Basic check for portsentry service running and how many bans in atcp file
 
 import os 
+
 
 tcplog = "/var/lib/portsentry/portsentry.blocked.tcp"
 tcpalog = "/var/lib/portsentry/portsentry.blocked.atcp"
@@ -15,12 +15,12 @@ if ( status != 0 ):
 with open(r"/var/lib/portsentry/portsentry.blocked.atcp",'r') as tcp:
     x = len(tcp.readlines())
     if ( x < 150 ):
-        print('OK', x)
+        print('OK', x, "| bans=%d" %x)
     
     elif ( x > 150 and x < 250 ):
-        print('WARN', x)
+        print('WARN', x,"| bans=%d" %x)
 
     else:
-        print('CRITICAL', x)
+        print('CRITICAL', x,"| bans=%d" %x)
     
     tcp.close()
