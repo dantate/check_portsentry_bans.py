@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+#2022 Daniel Tate
+#Extremely basic check for portsentry service running, and how many entries are in the portsentry log file.
 
 import os 
 import sys
