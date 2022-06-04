@@ -3,10 +3,6 @@
 #Extremely basic check for portsentry service running, and how many entries are in the portsentry log file.
 
 import os 
-import sys
-import subprocess
-from subprocess import Popen
-
 
 tcplog = "/var/lib/portsentry/portsentry.blocked.tcp"
 tcpalog = "/var/lib/portsentry/portsentry.blocked.atcp"
