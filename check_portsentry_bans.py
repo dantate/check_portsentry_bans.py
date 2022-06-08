@@ -2,7 +2,11 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Version 1.1 - Auto-check for atcp/tcp mode
 # Daniel Tate Wednesday 08-June-2022 12:48 PM
-# Unlimited Modification Permitted
+# Requires psutil (pip3 install psutil) and python3.
+
+# Common Error:
+# process in psutil.process_iter(): AttributeError: module 'psutil' has no attribute 'process_iter' 
+# Solution: update to latest psutil 
 
 import os 
 import psutil
