@@ -85,7 +85,7 @@ for process in psutil.process_iter():
     
 status = os.system('systemctl is-active --quiet portsentry')
 if ( status != 0 ): 
-    print('2 Portsentry Service is not running!') 
+    print('CRITICAL Portsentry Service is not running!') 
     exit(2) 
 
 with open(log,'r') as tcp:
