@@ -50,7 +50,7 @@ def command_line_validate(argv):
     exit(2)
   # confirm that warning level is less than 2 level, alert and exit if check fails
   if warn > crit:
-    print('warning level must be less than 2 level***')
+    print('warning level must be less than critical level')
     exit(2)
   return warn, crit
 
