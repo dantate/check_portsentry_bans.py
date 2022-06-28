@@ -2,13 +2,13 @@
 """ Description: check either current bans, or compare against the last 15-60m.
 """
 # Super Basic check for portsentry service running and how many bans in atcp file
-# Relies on portsentry being run by (or at least accessable to) systemd.
+# Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.3b
+# Version 2.0.4b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
-# Excuse mess - this was a learning exercise.
+# Excuse the mess - this was a learning exercise.
 
 import argparse
 import os
@@ -100,21 +100,21 @@ def validate_differential ():
             print(f"OK: Bans Unchanged {int(aged_bans)} == {count}|count={count}")
             exit(0)
         else:
-            print(f"OK: Bans Unchanged {int(aged_bans)}")
+            print(f"OK: Bans Unchanged {int(aged_bans)}|bans={count};{args.warn};{args.crit}")
             exit(0)
     elif int(aged_bans) > count:
         if __debug__:
             print(f"OK: Decrease in bans {int(aged_bans)} > {count}")
             exit(0)
         else:
-            print(f"OK: Decrease in bans from {count} to {int(aged_bans)}")
+            print(f"OK: Decrease in bans from {int(aged_bans)} to {count} |bans={count};{args.warn};{args.crit}")
             exit(0)
     elif (new_bans < args.warn):
         if __debug__:
             print(f"OK: {new_bans} new in {args.time} is less than {args.warn} new in {args.time}")
             exit(0)
         else:
-            print(f"OK: {new_bans} new bans in {args.time}")
+            print(f"OK: {new_bans} new bans in {args.time}|bans={new_bans};{args.warn};{args.crit}")
             exit(0)
     elif (new_bans >= args.warn and new_bans < args.crit):
         if __debug__:
@@ -122,14 +122,14 @@ def validate_differential ():
                 f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
             exit(1)
         else:
-            print(f"WARNING: {new_bans} new in {args.time}")
+            print(f"WARNING: {new_bans} new in {args.time}|bans={new_bans};{args.warn};{args.crit}")
             exit(1)
     else:
         if __debug__:
             print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
             exit(2)
         else:
-            print(f"CRITICAL: bans: {new_bans} new in {args.time}")
+            print(f"CRITICAL: bans: {new_bans} new in {args.time};{args.warn};{args.crit}")
             exit(2)
 
 def validate_normal ():
@@ -168,6 +168,8 @@ if __debug__:
     print("DEBUG: nested w/o diff", ((args.crit is None) or (args.warn is None)))
     print("DEBUG: nested w/ diff", (((args.crit is None) or (args.warn is None)) or diff is None))
     print(f"DEBUG: check_param: crit {args.crit} warn {args.warn} diff {args.diff}")
+
+### Determine flags..
 
 if (args.crit is not None) and (args.warn is not None):
     if __debug__: print(f"DEBUG: passed crit/warn validation")
