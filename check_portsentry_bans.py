@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessable to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.2b
+# Version 2.0.3b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
