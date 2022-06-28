@@ -266,7 +266,7 @@ if (normal_mode == 0):
         print(f"DEBUG: DIFF: DIFFERENTIAL")
         print(f"DEBUG: Aging...")
         print("DEBUG: DIFF: ROTATE: File 00m: ",file_age(differential_dir + "00m",timedelta(minutes=args.time)))
-    if file_age(differential_dir + "00m",timedelta(minutes=5)):
+    if file_age(differential_dir + "00m",timedelta(minutes=args.time)):
 # if file_age(differential_dir + "00m", timedelta(minutes=args.time)):
         rotate()
         validate_differential()
