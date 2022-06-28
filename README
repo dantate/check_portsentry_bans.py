@@ -1,0 +1,14 @@
+This is a nagios/iCinga2 plugin meant to check the status of portsentry.  It will confirm it is running, and either
+(without the -d flag) check current bans and quit, or (with the -d flag) check how many new bans have occured since
+15, 30, 45, or 60 minutes ago as decided by the -t flag.
+
+It reports the results via human-readable text and perfdata for graphing.
+
+This has only been tested with iCinga2.
+
+This was done as a learning project by a near-beginner.   The code is amateurish, but functional.
+
+I make no promises with it, though.
+
+If you make any changes to make it better, please e-mail me at bugs at imagination-works dot com or submit the change
+to github.
