@@ -62,6 +62,94 @@ def get_aged_bans (difffile):
             dfile.close()
             return bancount
 
+def rotate ():
+        if __debug__: print(f"DEBUG: DIFF: ROTATE: File 00m is {args.time} minutes old")
+        os.replace(differential_dir + "45m", differential_dir + "60m")
+        os.replace(differential_dir + "30m", differential_dir + "45m")
+        os.replace(differential_dir + "15m", differential_dir + "30m")
+        os.replace(differential_dir + "00m", differential_dir + "15m")
+        if __debug__: print("DEBUG: DIFF: POSTROTATE: Creating new datafile...")
+        with open(differential_dir + "00m", 'w') as f00m:
+            str_assemble1 = str(perf_counter())
+            str_assemble2 = str(str(count))
+            str_assemble = str_assemble1 + " " + str_assemble2
+            test = f00m.write(str_assemble)
+            if __debug__: print("DEBUG: DIFF: POSTROTATE: New Create is:", test)
+            f00m.close()
+
+def setup_env ():
+    mkdir = os.makedirs(differential_dir)
+    if __debug__:
+        print("DEBUG: DIFF: mkdir: ", mkdir)
+        print("DEBUG: DIFF: Creating initial file")
+    with open(differential_dir + "00m", 'w') as f00m:
+        str_assemble1 = str(perf_counter())
+        str_assemble2 = str(str(count))
+        str_assemble = str_assemble1 + " " + str_assemble2
+        write = f00m.write(str(str_assemble))
+        print("DEBUG: DIFF: write is", write)
+        f00m.close()
+        shutil.copy(differential_dir + "00m", differential_dir + "15m")
+        shutil.copy(differential_dir + "00m", differential_dir + "30m")
+        shutil.copy(differential_dir + "00m", differential_dir + "45m")
+        shutil.copy(differential_dir + "00m", differential_dir + "60m")
+
+def validate_differential ():
+    if int(aged_bans) == count:
+        if __debug__:
+            print(f"OK: Bans Unchanged {int(aged_bans)} == {count}|count={count}")
+            exit(0)
+        else:
+            print(f"OK: Bans Unchanged {int(aged_bans)}")
+            exit(0)
+    elif int(aged_bans) > count:
+        if __debug__:
+            print(f"OK: Decrease in bans {int(aged_bans)} > {count}")
+            exit(0)
+        else:
+            print(f"OK: Decrease in bans from {count} to {int(aged_bans)}")
+            exit(0)
+    elif (new_bans < args.warn):
+        if __debug__:
+            print(f"OK: {new_bans} new in {args.time} is less than {args.warn} new in {args.time}")
+            exit(0)
+        else:
+            print(f"OK: {new_bans} new bans in {args.time}")
+            exit(0)
+    elif (new_bans >= args.warn and new_bans < args.crit):
+        if __debug__:
+            print(
+                f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
+            exit(1)
+        else:
+            print(f"WARNING: {new_bans} new in {args.time}")
+            exit(1)
+    else:
+        if __debug__:
+            print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
+            exit(2)
+        else:
+            print(f"CRITICAL: bans: {new_bans} new in {args.time}")
+            exit(2)
+
+def validate_normal ():
+    with open(log,'r') as logfile:
+        x = len(logfile.readlines())
+        if __debug__: print(type(x), type(args.warn))
+        if ( x < args.warn ):
+            print('OK', x, "| bans=%d" %x)
+            logfile.close()
+            exit(0)
+
+        elif ( x >= args.warn and x < args.crit ):
+            print('WARN', x,"| bans=%d" %x)
+            logfile.close()
+            exit(1)
+        else:
+            print('CRITICAL', x,"| bans=%d" %x)
+            logfile.close()
+            exit(2)
+
 ### Get Parameters
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-d', '--diff', help="Differential mode", action='store_true')
@@ -165,21 +253,8 @@ if args.diff is True:
     dir_exists = os.path.exists(differential_dir)
     if __debug__: print(f"DEBUG: DIFF: dir_exists: {dir_exists}")
     if not dir_exists:
-        mkdir = os.makedirs(differential_dir)
-        if __debug__:
-            print("DEBUG: DIFF: mkdir: ",mkdir)
-            print("DEBUG: DIFF: Creating initial file")
-        with open(differential_dir + "00m", 'w') as f00m:
-            str_assemble1 = str(perf_counter())
-            str_assemble2 = str(str(count))
-            str_assemble = str_assemble1 + " " + str_assemble2
-            write = f00m.write(str(str_assemble))
-            print("DEBUG: DIFF: write is", write)
-            f00m.close()
-            shutil.copy(differential_dir + "00m", differential_dir + "15m")
-            shutil.copy(differential_dir + "00m", differential_dir + "30m")
-            shutil.copy(differential_dir + "00m", differential_dir + "45m")
-            shutil.copy(differential_dir + "00m", differential_dir + "60m")
+        setup_env()
+
 if __debug__:
     print("DEBUG: normal mode is:", normal_mode)
     print("DEBUG: normal logic test is:", (normal_mode == 1))
@@ -191,80 +266,20 @@ if (normal_mode == 0):
         print(f"DEBUG: DIFF: DIFFERENTIAL")
         print(f"DEBUG: Aging...")
         print("DEBUG: DIFF: ROTATE: File 00m: ",file_age(differential_dir + "00m",timedelta(minutes=args.time)))
-    if file_age(differential_dir + "00m",timedelta(minutes=args.time)):
-        if __debug__: print(f"DEBUG: DIFF: ROTATE: File 00m is {args.time} minutes old")
-        os.replace(differential_dir + "45m", differential_dir + "60m")
-        os.replace(differential_dir + "30m", differential_dir + "45m")
-        os.replace(differential_dir + "15m", differential_dir + "30m")
-        os.replace(differential_dir + "00m", differential_dir + "15m")
-        if __debug__: print("DEBUG: DIFF: POSTROTATE: Creating new datafile...")
-        with open(differential_dir + "00m", 'w') as f00m:
-            str_assemble1 = str(perf_counter())
-            str_assemble2 = str(str(count))
-            str_assemble = str_assemble1 + " " + str_assemble2
-            test = f00m.write(str_assemble)
-            if __debug__: print("DEBUG: DIFF: POSTROTATE: New Create is:", test)
-            f00m.close()
+    if file_age(differential_dir + "00m",timedelta(minutes=5)):
+# if file_age(differential_dir + "00m", timedelta(minutes=args.time)):
+        rotate()
+        validate_differential()
 
     else:
         if __debug__: print("DEBUG: DIFF: NOAGE: File is not yet aged out.")
         aged_bans = get_aged_bans(differential_dir + str(args.time) +"m")
         new_bans = (count - int(aged_bans))
-
-        if int(aged_bans) == count:
-            if __debug__:
-                print(f"OK: Bans Unchanged {int(aged_bans)} == {count}|count={count}")
-                exit(0)
-            else:
-                print(f"OK: Bans Unchanged {int(aged_bans)}")
-                exit(0)
-        elif int(aged_bans) > count:
-            if __debug__:
-                print(f"OK: Decrease in bans {int(aged_bans)} > {count}")
-                exit(0)
-            else:
-                print(f"OK: Decrease in bans from {count} to {int(aged_bans)}")
-                exit(0)
-        elif ( new_bans < args.warn ):
-            if __debug__:
-                print(f"OK: {new_bans} new in {args.time} is less than {args.warn} new in {args.time}")
-                exit(0)
-            else:
-                print(f"OK: {new_bans} new bans in {args.time}")
-                exit(0)
-        elif ( new_bans >= args.warn and new_bans < args.crit ) :
-            if __debug__:
-                print(f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
-                exit(1)
-            else:
-                print(f"WARNING: {new_bans} new in {args.time}")
-                exit(1)
-        else:
-            if __debug__:
-                print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
-                exit(2)
-            else:
-                print(f"CRITICAL: bans: {new_bans} new in {args.time}")
-                exit(2)
-        exit(0)
+        validate_differential()
 
 if (normal_mode == 1):
     if __debug__: print(f"In NORMAL MODE {normal_mode}")
-    with open(log,'r') as logfile:
-        x = len(logfile.readlines())
-        if __debug__: print(type(x), type(args.warn))
-        if ( x < args.warn ):
-            print('OK', x, "| bans=%d" %x)
-            logfile.close()
-            exit(0)
+    validate_normal()
 
-        elif ( x >= args.warn and x < args.crit ):
-            print('WARN', x,"| bans=%d" %x)
-            logfile.close()
-            exit(1)
-        else:
-            print('CRITICAL', x,"| bans=%d" %x)
-            logfile.close()
-            exit(2)
 else:
     exit(1)
