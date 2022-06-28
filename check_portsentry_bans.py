@@ -87,7 +87,7 @@ def setup_env ():
         str_assemble2 = str(str(count))
         str_assemble = str_assemble1 + " " + str_assemble2
         write = f00m.write(str(str_assemble))
-        print("DEBUG: DIFF: write is", write)
+        if __debug__: print("DEBUG: DIFF: write is", write)
         f00m.close()
         shutil.copy(differential_dir + "00m", differential_dir + "15m")
         shutil.copy(differential_dir + "00m", differential_dir + "30m")
