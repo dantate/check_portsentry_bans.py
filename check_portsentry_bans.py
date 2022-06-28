@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessable to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0b
+# Version 2.0.2b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -13,6 +13,7 @@
 import argparse
 import os
 import psutil
+import shutil
 from time import perf_counter
 from os.path import exists
 from datetime import datetime
@@ -33,6 +34,9 @@ time: int = 0
 warn=-1
 crit=-1
 differential_dir = tmp_dir + "/"
+new_bans=0
+aged_bans=0
+
 
 def file_age (file, delta):
     cutoff = datetime.utcnow() - delta
@@ -156,6 +160,8 @@ if __debug__:print(f"DEBUG: DIFF: args.diff is True: {args.diff is True}")
 if args.diff is True:
     if __debug__: print("DEBUG: DIFF: Differential is ON")
 
+### Do Setup if Needed.
+
     dir_exists = os.path.exists(differential_dir)
     if __debug__: print(f"DEBUG: DIFF: dir_exists: {dir_exists}")
     if not dir_exists:
@@ -164,15 +170,16 @@ if args.diff is True:
             print("DEBUG: DIFF: mkdir: ",mkdir)
             print("DEBUG: DIFF: Creating initial file")
         with open(differential_dir + "00m", 'w') as f00m:
-            str_assemble = str(perf_counter()),count
+            str_assemble1 = str(perf_counter())
+            str_assemble2 = str(str(count))
+            str_assemble = str_assemble1 + " " + str_assemble2
             write = f00m.write(str(str_assemble))
             print("DEBUG: DIFF: write is", write)
             f00m.close()
-            touch(differential_dir + "15m")
-            touch(differential_dir + "30m")
-            touch(differential_dir + "45m")
-            touch(differential_dir + "60m")
-
+            shutil.copy(differential_dir + "00m", differential_dir + "15m")
+            shutil.copy(differential_dir + "00m", differential_dir + "30m")
+            shutil.copy(differential_dir + "00m", differential_dir + "45m")
+            shutil.copy(differential_dir + "00m", differential_dir + "60m")
 if __debug__:
     print("DEBUG: normal mode is:", normal_mode)
     print("DEBUG: normal logic test is:", (normal_mode == 1))
@@ -198,6 +205,7 @@ if (normal_mode == 0):
             test = f00m.write(str_assemble)
             if __debug__: print("DEBUG: DIFF: POSTROTATE: New Create is:", test)
             f00m.close()
+
     else:
         if __debug__: print("DEBUG: DIFF: NOAGE: File is not yet aged out.")
         aged_bans = get_aged_bans(differential_dir + str(args.time) +"m")
