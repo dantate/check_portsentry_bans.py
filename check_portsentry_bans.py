@@ -1,15 +1,18 @@
 #!/usr/bin/python3
+""" Description: check either current bans, or compare against the last 15-60m.
+"""
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessable to) systemd.
 # Requires psutil library. (pip3 install psutil)
 # Version 2.0b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
+#
+# Excuse mess - this was a learning exercise.
+
 import argparse
 import os
-import getopt
 import psutil
-import sys
 from time import perf_counter
 from os.path import exists
 from datetime import datetime
@@ -56,11 +59,11 @@ def get_aged_bans (difffile):
             return bancount
 
 ### Get Parameters
-parser = argparse.ArgumentParser(description="Arguments")
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-d', '--diff', help="Differential mode", action='store_true')
+parser.add_argument('-t', '--time', help="Minutes for differential", type=int, metavar='15,30,45,60')
 parser.add_argument('-w', '--warn', help="Warning Threshold", type=int, metavar='warn')
 parser.add_argument('-c', '--crit', help="Critical Threshold", type=int, metavar='crit')
-parser.add_argument('-d', '--diff', help="differential", action='store_true')
-parser.add_argument('-t', '--time', help="Time in which to match elasticity", type=int, metavar='15,30,45,60')
 args=parser.parse_args()
 
 
@@ -182,18 +185,18 @@ if (normal_mode == 0):
         print(f"DEBUG: Aging...")
         print("DEBUG: DIFF: ROTATE: File 00m: ",file_age(differential_dir + "00m",timedelta(minutes=args.time)))
     if file_age(differential_dir + "00m",timedelta(minutes=args.time)):
-        print(f"DEBUG: DIFF: ROTATE: File 00m is {args.time} minutes old")
+        if __debug__: print(f"DEBUG: DIFF: ROTATE: File 00m is {args.time} minutes old")
         os.replace(differential_dir + "45m", differential_dir + "60m")
         os.replace(differential_dir + "30m", differential_dir + "45m")
         os.replace(differential_dir + "15m", differential_dir + "30m")
         os.replace(differential_dir + "00m", differential_dir + "15m")
-        print("DEBUG: DIFF: POSTROTATE: Creating new datafile...")
+        if __debug__: print("DEBUG: DIFF: POSTROTATE: Creating new datafile...")
         with open(differential_dir + "00m", 'w') as f00m:
             str_assemble1 = str(perf_counter())
             str_assemble2 = str(str(count))
             str_assemble = str_assemble1 + " " + str_assemble2
             test = f00m.write(str_assemble)
-            print("DEBUG: DIFF: POSTROTATE: New Create is:", test)
+            if __debug__: print("DEBUG: DIFF: POSTROTATE: New Create is:", test)
             f00m.close()
     else:
         if __debug__: print("DEBUG: DIFF: NOAGE: File is not yet aged out.")
