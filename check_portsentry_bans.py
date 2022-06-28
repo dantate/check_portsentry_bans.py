@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -O
 """ Description: check either current bans, or compare against the last 15-60m.
 """
 # Super Basic check for portsentry service running and how many bans in atcp file
