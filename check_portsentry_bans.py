@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.4b
+# Version 2.0.5b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -118,8 +118,7 @@ def validate_differential ():
             exit(0)
     elif (new_bans >= args.warn and new_bans < args.crit):
         if __debug__:
-            print(
-                f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
+            print( f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
             exit(1)
         else:
             print(f"WARNING: {new_bans} new in {args.time}|bans={new_bans};{args.warn};{args.crit}")
@@ -129,7 +128,7 @@ def validate_differential ():
             print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
             exit(2)
         else:
-            print(f"CRITICAL: bans: {new_bans} new in {args.time};{args.warn};{args.crit}")
+            print(f"CRITICAL: bans: {new_bans} new bans in in {args.time}|bans={new_bans};{args.warn};{args.crit}")
             exit(2)
 
 def validate_normal ():
