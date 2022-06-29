@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.8b
+# Version 2.0.9b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -94,41 +94,43 @@ def setup_env ():
         shutil.copy(differential_dir + "00m", differential_dir + "45m")
         shutil.copy(differential_dir + "00m", differential_dir + "60m")
 
+### this part is messy because my mathemtical dylexia gets confused with all the numerical variables.
+
 def validate_differential ():
     if int(aged_bans) == count:
         if __debug__:
-            print(f"OK: Bans Unchanged {int(aged_bans)} == {count}|count={count}")
+            print(f"OK: Bans Unchanged {int(new_bans)} == {new_bans}|count={count}")
             exit(0)
         else:
-            print(f"OK: Bans Unchanged {int(aged_bans)}|bans={aged_bans};{args.warn};{args.crit}")
+            print(f"OK: Bans Unchanged {int(new_bans)} new in {args.time} min ({count})|new_bans={new_bans};{args.warn};{args.crit}")
             exit(0)
     elif int(aged_bans) > count:
         if __debug__:
             print(f"OK: Decrease in bans {int(aged_bans)} > {count}")
             exit(0)
         else:
-            print(f"OK: Decrease in bans from {int(aged_bans)} to {count} |bans={count};{args.warn};{args.crit}")
+            print(f"OK: Decrease in bans from {int(aged_bans)} to {count} |new_bans={new_bans};{args.warn};{args.crit}")
             exit(0)
     elif (new_bans < args.warn):
         if __debug__:
             print(f"OK: {new_bans} new in {args.time} is less than {args.warn} new in {args.time}")
             exit(0)
         else:
-            print(f"OK: {new_bans} new bans in {args.time}|bans={new_bans};{args.warn};{args.crit}")
+            print(f"OK: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
             exit(0)
     elif (new_bans >= args.warn and new_bans < args.crit):
         if __debug__:
             print( f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
             exit(1)
         else:
-            print(f"WARNING: {new_bans} new in {args.time}|bans={new_bans};{args.warn};{args.crit}")
+            print(f"WARNING: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
             exit(1)
     else:
         if __debug__:
             print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
             exit(2)
         else:
-            print(f"CRITICAL: bans: {new_bans} new bans in in {args.time}|bans={new_bans};{args.warn};{args.crit}")
+            print(f"CRITICAL: bans: {new_bans} new bans in in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
             exit(2)
 
 def validate_normal ():
@@ -268,7 +270,7 @@ if (normal_mode == 0):
         print(f"DEBUG: Aging...")
         print("DEBUG: DIFF: ROTATE: File 00m: ",file_age(differential_dir + "00m",timedelta(minutes=args.time)))
     if file_age(differential_dir + "00m",timedelta(minutes=args.time)):
-        rotate()
+        rotate() # will prv file w/ bans={log|wc-l}
         aged_bans = get_aged_bans(differential_dir + str(args.time) +"m")
         new_bans = (count - int(aged_bans))
         validate_differential()
