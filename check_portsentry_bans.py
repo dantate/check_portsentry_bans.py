@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.6b
+# Version 2.0.7b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -268,7 +268,8 @@ if (normal_mode == 0):
         print(f"DEBUG: Aging...")
         print("DEBUG: DIFF: ROTATE: File 00m: ",file_age(differential_dir + "00m",timedelta(minutes=args.time)))
     if file_age(differential_dir + "00m",timedelta(minutes=args.time)):
-# if file_age(differential_dir + "00m", timedelta(minutes=args.time)):
+        aged_bans = get_aged_bans(differential_dir + str(args.time) +"m")
+        new_bans = (count - int(aged_bans))
         rotate()
         validate_differential()
 
