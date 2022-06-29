@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.5b
+# Version 2.0.6b
 # Daniel Tate Wednesday 08-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -100,7 +100,7 @@ def validate_differential ():
             print(f"OK: Bans Unchanged {int(aged_bans)} == {count}|count={count}")
             exit(0)
         else:
-            print(f"OK: Bans Unchanged {int(aged_bans)}|bans={count};{args.warn};{args.crit}")
+            print(f"OK: Bans Unchanged {int(aged_bans)}|bans={aged_bans};{args.warn};{args.crit}")
             exit(0)
     elif int(aged_bans) > count:
         if __debug__:
