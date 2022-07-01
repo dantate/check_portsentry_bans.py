@@ -4,7 +4,7 @@
 # Super Basic check for portsentry service running and how many bans in atcp file
 # Relies on portsentry being run by (or at least accessible to) systemd.
 # Requires psutil library. (pip3 install psutil)
-# Version 2.0.9b
+# Version 2.0.10b
 # Daniel Tate Wednesday 29-June-2022 3:35 PM
 # Unlimited Modification Permitted
 #
@@ -24,7 +24,7 @@ from datetime import timedelta
 log_location = "/var/lib/portsentry"
 log_prefix = "portsentry.blocked"
 portsentry_exec = "portsentry"
-tmp_dir = "/tmp/portsentry_diff/"
+tmp_dir = "/tmp/portsentry_diff"
 
 ### Definitions
 
@@ -98,40 +98,21 @@ def setup_env ():
 
 def validate_differential ():
     if int(aged_bans) == count:
-        if __debug__:
-            print(f"OK: Bans Unchanged {int(new_bans)} == {new_bans}|count={count}")
-            exit(0)
-        else:
-            print(f"OK: Bans Unchanged {int(new_bans)} new in {args.time} min ({count})|new_bans={new_bans};{args.warn};{args.crit}")
-            exit(0)
+        print(f"OK: Bans Unchanged {int(new_bans)} new in {args.time} min ({count})|new_bans={new_bans};{args.warn};{args.crit}")
+        exit(0)
     elif int(aged_bans) > count:
-        if __debug__:
-            print(f"OK: Decrease in bans {int(aged_bans)} > {count}")
-            exit(0)
-        else:
-            print(f"OK: Decrease in bans from {int(aged_bans)} to {count} |new_bans={new_bans};{args.warn};{args.crit}")
-            exit(0)
+    # Set manually to 0 here, or else we get a negative number that really skews the graph.
+        print(f"OK: Decrease in bans from {int(aged_bans)} to {count} |new_bans=0;{args.warn};{args.crit}")
+        exit(0)
     elif (new_bans < args.warn):
-        if __debug__:
-            print(f"OK: {new_bans} new in {args.time} is less than {args.warn} new in {args.time}")
-            exit(0)
-        else:
-            print(f"OK: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
-            exit(0)
+        print(f"OK: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
+        exit(0)
     elif (new_bans >= args.warn and new_bans < args.crit):
-        if __debug__:
-            print( f"WARNING: {new_bans} new in {args.time} is greater than or equal to warn: {args.warn} new in {args.time}")
-            exit(1)
-        else:
-            print(f"WARNING: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
-            exit(1)
+        print(f"WARNING: {new_bans} new bans in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
+        exit(1)
     else:
-        if __debug__:
-            print(f"CRITICAL: bans: {new_bans} new in {args.time} is greater than crit: {args.crit} new in {args.time}")
-            exit(2)
-        else:
-            print(f"CRITICAL: bans: {new_bans} new bans in in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
-            exit(2)
+        print(f"CRITICAL: bans: {new_bans} new bans in in {args.time} mins ({count})|new_bans={new_bans};{args.warn};{args.crit}")
+        exit(2)
 
 def validate_normal ():
     with open(log,'r') as logfile:
@@ -154,7 +135,7 @@ def validate_normal ():
 ### Get Parameters
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-d', '--diff', help="Differential mode", action='store_true')
-parser.add_argument('-t', '--time', help="Minutes for differential", type=int, metavar='15,30,45,60')
+parser.add_argument('-t', '--time', help="Minutes for differential", type=int, metavar='15,30,45,60', choices=[15, 30, 45, 60])
 parser.add_argument('-w', '--warn', help="Warning Threshold", type=int, metavar='warn')
 parser.add_argument('-c', '--crit', help="Critical Threshold", type=int, metavar='crit')
 args=parser.parse_args()
